@@ -1,0 +1,4 @@
+实现了监听者模式。依赖QT
+Subject类提供了主题功能，禁用了其继承能力（因为一个类可能提供多种主题供观察者监听），禁用了其复制拷贝能力。其可以组合到类中使用。观察者的添加和删除需要Observer类来维护。
+Observer类提供了观察者功能，其可以继承使用。可以使用addObserver和来removeObserver来将自已添加或删除给定的Subject。当然也可以只添加了Subject，等Observer析构时自己删除出Subject。如果继承使用后和现有的函数冲突后，请改为组合使用ObserverUpdateHelper类，可以自定义提供一个响应函数。
+欢迎提出建议。
