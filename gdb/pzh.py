@@ -4,12 +4,13 @@
 #import gdb.types
 import struct
 import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
+if sys.version_info < (3, 0):
+	reload(sys)
+	sys.setdefaultencoding('utf-8')
+
 
 class PrintZh(gdb.Command):
 	"""输出OO中的字符串: pzh NAME
-
 支持中文输出
 The terminals need to support Chinese
 用例:pzh NAME
@@ -24,7 +25,7 @@ www.ccshell.com
 =====
 Version
 =====
-0.3
+0.4
 """
 
 	def __init__(self):
@@ -38,47 +39,50 @@ Version
 		n = 0
 		try:
 			while n <= nLen:
-				slist[n:n] = unichr(aStr[n])
+				if sys.version_info < (3, 0):
+					slist[n:n] = unichr(aStr[n])
+				else:
+					slist[n:n] = chr(aStr[n])
 				n = n +1
 		except ValueError as e:
-			print "字符串中的元素不是标准的字符"
+			print("字符串中的元素不是标准的字符")
 
-		ss = ''.join( slist[0:] )
+		ss = ''.join( slist[0:n-1] )
 		return ss
 
 	def invoke(self, arg, from_tty):
 		try:
 			dest = gdb.parse_and_eval( arg )
 			srcType = str(dest.type)
-			#print srcType
+			#print(srcType)
 
 			try:
 				if 'rtl_uString' in srcType:
 					#display rtl_uString
-					print PrintZh.getzh( self, dest[ 'buffer'], dest[ 'length' ] )
+					print(PrintZh.getzh( self, dest[ 'buffer'], dest[ 'length' ] ))
 				elif 'OUString' in srcType:
 					#display rtl::OUString
-					print PrintZh.getzh( self, dest[ 'pData' ][ 'buffer' ], dest[ 'pData' ]['length'] )
+					print(PrintZh.getzh( self, dest[ 'pData' ][ 'buffer' ], dest[ 'pData' ]['length'] ))
 				elif 'OString' in srcType:
 					#display rtl::OString
-					print PrintZh.getzh( self, dest[ 'pData' ][ 'buffer' ], dest[ 'pData' ]['length'] )
+					print(PrintZh.getzh( self, dest[ 'pData' ][ 'buffer' ], dest[ 'pData' ]['length'] ))
 				elif 'String' in srcType:
 					#display (Uni)String
-					print PrintZh.getzh( self, dest[ 'mpData' ][ 'maStr' ], dest[ 'mpData' ]['mnLen'] )
+					print(PrintZh.getzh( self, dest[ 'mpData' ][ 'maStr' ], dest[ 'mpData' ]['mnLen'] ))
 				elif 'char' in srcType:
-					print dest
+					print(dest)
 				elif 'util::URL' in srcType:
 					#display util::URL
 					for key in [ "Complete", "Main", "Protocol", "User", "Password", "Server", "Path", "Name" ]:
 						buff = dest[ key ][ 'pData' ][ 'buffer' ]
 						nlen = dest[ key ][ 'pData' ]['length']
 						print("%s =%s" %(key, PrintZh.getzh(self,buff,nlen)) )
-					print "Port = %i" % dest[ 'Port' ]
+					print("Port = %i" % dest[ 'Port' ])
 			except RuntimeError as e:
-				print "请用有效的参数,使用'help pzh'获得帮助"
+				print("请用有效的参数,使用'help pzh'获得帮助")
 
 		except RuntimeError as e:
-			print "参数对应的变量不存在或发生了未知错误，使用'help pzh'获得帮助"
+			print("参数对应的变量不存在或发生了未知错误，使用'help pzh'获得帮助")
 		
 
 PrintZh()
