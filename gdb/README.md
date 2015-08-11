@@ -1,5 +1,6 @@
 # savebreakpoint.py
-
+### -----此功能gdb已经内置支持了,如下方式使用：
+	(gdb) save breakpoints /tmp/break
 参考：
 
 [Writing a new gdb command](http://tromey.com/blog/?p=501)
